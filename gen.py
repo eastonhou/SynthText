@@ -95,7 +95,7 @@ def main(viz=False):
     NUM_IMG = N
   start_idx,end_idx = 0,min(NUM_IMG, N)
 
-  RV3 = RendererV3(DATA_PATH,max_time=SECS_PER_IMG)
+  RV3 = RendererV3(DATA_PATH,max_time=None)
   for i in range(start_idx,end_idx):
     imname = imnames[i]
     try:
