@@ -13,7 +13,7 @@ def fit_plane(xyz,z_pos=None):
     xyz_c = xyz - mean[None,:]
     l,v = np.linalg.eig(xyz_c.T.dot(xyz_c))
     abc = v[:,np.argmin(l)]
-    d = -np.sum(abc*mean)
+    d = -np.dot(abc, mean)
     # unit-norm the plane-normal:
     abcd =  np.r_[abc,d]/np.linalg.norm(abc)
     # flip the normal direction:
@@ -28,7 +28,6 @@ def fit_plane_ransac(pts, neighbors=None,z_pos=None, dist_inlier=0.05,
     Fits a 3D plane model using RANSAC. 
     pts : (nx3 array) of point coordinates   
     """
-    n,_ = pts.shape
     ninlier,models = [],[]
     for i in range(max_iter):
         if neighbors is None:

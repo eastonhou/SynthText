@@ -112,8 +112,7 @@ class TextRegions(object):
 
         y_m,x_m = np.where(mask)
         mask_idx = np.zeros_like(mask,'int32')
-        for i in range(len(y_m)):
-            mask_idx[y_m[i],x_m[i]] = i
+        mask_idx[mask] = np.arange(mask.sum())
 
         xp,xn = np.zeros_like(mask), np.zeros_like(mask)
         yp,yn = np.zeros_like(mask), np.zeros_like(mask)
@@ -227,8 +226,7 @@ def get_text_placement_mask(xyz,mask,plane,pad=2,viz=False):
     pts,pts_fp = [],[]
     center = np.array([W,H])/2
     n_front = np.array([0.0,0.0,-1.0])
-    for i in range(len(contour)):
-        cnt_ij = contour[i]
+    for cnt_ij in contour:
         xyz = su.DepthCamera.plane2xyz(center, cnt_ij, plane)
         R = su.rot3d(plane[:3],n_front)
         xyz = xyz.dot(R.T)
@@ -237,14 +235,14 @@ def get_text_placement_mask(xyz,mask,plane,pad=2,viz=False):
 
     # unrotate in 2D plane:
     rect = cv2.minAreaRect(pts_fp[0].copy().astype('float32'))
-    box = np.array(cv2.boxPoints(rect))
+    box = cv2.boxPoints(rect)
     R2d = su.unrotate2d(box.copy())
     box = np.vstack([box,box[0,:]]) #close the box for visualization
 
     mu = np.median(pts_fp[0],axis=0)
-    pts_tmp = (pts_fp[0]-mu[None,:]).dot(R2d.T) + mu[None,:]
-    boxR = (box-mu[None,:]).dot(R2d.T) + mu[None,:]
-    
+    pts_tmp = (pts_fp[0]-mu[None,:]) @ R2d.T + mu[None,:]
+    boxR = (box-mu[None,:]) @ R2d.T + mu[None,:]
+
     # rescale the unrotated 2d points to approximately
     # the same scale as the target region:
     s = rescale_frontoparallel(pts_tmp,boxR,pts[0])
